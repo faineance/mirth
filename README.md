@@ -1,2 +1,2 @@
 # mirth
-Funny little (mostly) stack based DSLs
+Funny little (mostly) stack based DSL experiments
