@@ -24,8 +24,8 @@ mul = liftF $ Mul ()
 dup = liftF $ Dup ()
 end = liftF End
 
-interpret :: Mirth n -> Either String Int
-interpret = eval' []
+eval :: Mirth n -> Either String Int
+eval = eval' []
 
 eval' :: [Int] -> Free Instruction t -> Either String Int
 eval' stack (Free (Push v cont))         = eval' (v : stack) cont
@@ -43,4 +43,4 @@ eval' _ (Free End)                       = Left "Not Empty at End"
 eval' _ Pure {}                          = Left "Missing End"
 
 main :: IO ()
-main = print $ interpret $ do {push 2; push 3; add; end}
+main = print $ eval $ do {push 2; push 3; add; end}
