@@ -16,7 +16,6 @@ type Mirth = Free Instruction
 push :: Int -> Mirth ()
 push n = liftF $ Push n ()
 
-
 add, sub, mul, dup, end :: Mirth ()
 add = liftF $ Add ()
 sub = liftF $ Sub ()

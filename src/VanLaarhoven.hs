@@ -1,12 +1,13 @@
+-- http://r6.ca/blog/20140210T181244Z.html
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RecordWildCards  #-}
 module Main where
 
 import           Control.Exception
+import           Control.Monad.Free.VanLaarhoven
 import           Data.IORef
 import           Data.Typeable
 
-import           Control.Monad.Free.VanLaarhoven
 import           Control.Monad.State             hiding (state)
 import           Control.Monad.Trans.Except
 
@@ -15,7 +16,7 @@ data Instruction m = Instruction { pushv :: Int -> m (), popv :: m Int }
 type Mirth = Free Instruction
 
 data MirthException = NotEnoughItems
-  deriving (Show, Typeable)
+  deriving (Show)
 
 instance Exception MirthException
 
@@ -31,16 +32,20 @@ dup = do
         push v
         push v
 
-bop :: (Int -> Int -> Int) -> Free Instruction ()
+bop :: (Int -> Int -> Int) -> Mirth ()
 bop f = do
         x <- pop
         y <- pop
         push (x `f` y)
 
-add, sub, mul :: Free Instruction ()
+add, sub, mul, pow, square, cube :: Mirth ()
 add = bop (+)
 sub = bop (-)
 mul = bop (*)
+pow = bop (^)
+
+square = do dup; mul
+cube = do square; mul
 
 state :: Instruction (ExceptT MirthException (State [Int]))
 state = Instruction { .. }
@@ -52,7 +57,6 @@ state = Instruction { .. }
                                 put xs
                                 return x
                     [] -> throwE NotEnoughItems
-
 
 eval :: Mirth n -> Either MirthException n
 eval p = runExceptT (runFree p state) `evalState` []
