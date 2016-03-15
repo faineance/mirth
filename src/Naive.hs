@@ -8,7 +8,6 @@ data Instruction next = Push Int next
                       | Sub      next
                       | Mul      next
                       | Dup      next
-                      | End
                       deriving (Show, Functor)
 
 type Mirth = Free Instruction
@@ -16,12 +15,12 @@ type Mirth = Free Instruction
 push :: Int -> Mirth ()
 push n = liftF $ Push n ()
 
-add, sub, mul, dup, end :: Mirth ()
+add, sub, mul, dup :: Mirth ()
 add = liftF $ Add ()
 sub = liftF $ Sub ()
 mul = liftF $ Mul ()
 dup = liftF $ Dup ()
-end = liftF End
+
 
 eval :: Mirth n -> Either String Int
 eval = eval' []
@@ -36,10 +35,9 @@ eval' _ (Free Add {})                    = Left "Not enough items on stack"
 eval' _ (Free Sub {})                    = Left "Not enough items on stack"
 eval' _ (Free Mul {})                    = Left "Not enough items on stack"
 eval' _ (Free Dup {})                    = Left "Not enough items on stack"
-eval' [] (Free End)                      = Left "Not enough items on stack"
-eval' [r] (Free End)                     = Right r
-eval' _ (Free End)                       = Left "Not Empty at End"
-eval' _ Pure {}                          = Left "Missing End"
+
+eval' [] Pure {}                          = Left "Not enough items on stack"
+eval' [r] Pure {}                          = Right r
 
 main :: IO ()
-main = print $ eval $ do {push 2; push 3; add; end}
+main = print $ eval $ do {push 2; push 3; add}

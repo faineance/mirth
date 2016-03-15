@@ -1,12 +1,10 @@
 -- http://r6.ca/blog/20140210T181244Z.html
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE RecordWildCards  #-}
 module Main where
 
 import           Control.Exception
 import           Control.Monad.Free.VanLaarhoven
-import           Data.IORef
-import           Data.Typeable
+
 
 import           Control.Monad.State             hiding (state)
 import           Control.Monad.Trans.Except
@@ -48,11 +46,11 @@ square = do dup; mul
 cube = do square; mul
 
 state :: Instruction (ExceptT MirthException (State [Int]))
-state = Instruction { .. }
+state = Instruction { pushv=pushv, popv=popv }
   where pushv v = modify (v :)
         popv = do
-                s <- get
-                case s of
+                stack <- get
+                case stack of
                     (x:xs) -> do
                                 put xs
                                 return x
